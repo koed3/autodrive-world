@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AutoDrive World</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101923;color:white;font-family:Arial,sans-serif}
+header{padding:16px;background:#1a2938;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+h1{font-size:20px;margin:0}
+main{padding:12px;max-width:1100px;margin:auto}
+canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#8dc7ed;border-radius:12px}
+.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+select,button,input{width:100%;padding:12px;border-radius:8px;border:1px solid #465b6e;background:#26394b;color:white;font-size:15px;min-height:44px}
+button{background:#1768ce;cursor:pointer}
+#status{color:#a9d7ff}
+@media(max-width:480px){.controls{grid-template-columns:1fr}header{flex-direction:column}}
+</style>
+</head>
+<body>
+<header>
+<h1>🚘 AutoDrive World</h1>
+<div id="clock">시간 확인 중...</div>
+</header>
+<main>
+<canvas id="game" width="960" height="540"></canvas>
+<div class="controls">
+<label>풍경
+<select id="place">
+<option value="snow">설산</option>
+<option value="beach">해변</option>
+<option value="forest">숲</option>
+<option value="city">도시</option>
+</select></label>
+<label>날씨
+<select id="weather">
+<option value="sunny">맑음</option>
+<option value="rain">비</option>
+<option value="snow">눈</option>
+<option value="fog">안개</option>
+</select></label>
+<label>게임 속 시간
+<select id="day">
+<option value="day">낮</option>
+<option value="sunset">노을</option>
+<option value="night">밤</option>
+</select></label>
+<button id="camera">1인칭 / 3인칭 전환</button>
+<button id="drive">자율주행 정지</button>
+</div>
+<p id="status">자율주행 중 · 차선 유지</p>
+<form id="music">
+<label>음악 링크
+<input id="url" type="url" placeholder="https://..." required>
+</label>
+<button type="submit">음악 링크 열기</button>
+</form>
+<p>실제 시각과 게임 속 시간은 별도로 관리됩니다.</p>
+</main>
+<script>
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+let driving=true,third=true,offset=0;
+const $=id=>document.getElementById(id);
+
+function draw(){
+ const w=canvas.width,h=canvas.height;
+ const place=$("place").value;
+ const day=$("day").value;
+ const weather=$("weather").value;
+ const skies={day:"#87c9ef",sunset:"#e99a79",night:"#10182e"};
+ const ground={snow:"#e4ebf0",beach:"#e5cc8b",forest:"#3c7546",city:"#777e87"};
+ ctx.fillStyle=skies[day];ctx.fillRect(0,0,w,h*.65);
+ ctx.fillStyle=ground[place];ctx.fillRect(0,h*.48,w,h*.52);
+
+ if(place==="snow"){
+   ctx.fillStyle="#e8eef5";
+   for(let i=0;i<9;i++){
+     let x=i*125-40;
+     ctx.beginPath();ctx.moveTo(x,300);ctx.lineTo(x+90,90+(i%3)*35);ctx.lineTo(x+180,300);ctx.fill();
+   }
+ }
+ if(place==="beach"){
+   ctx.fillStyle="#42b6d4";ctx.fillRect(0,260,w,100);
+   ctx.strokeStyle="#d8f6ff";ctx.lineWidth=3;
+   for(let y=275;y<350;y+=18){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y+8);ctx.stroke()}
+ }
+ if(place==="forest"){
+   for(let i=0;i<20;i++){
+     let x=(i*73)%w;
+     ctx.fillStyle="#245438";ctx.beginPath();
+     ctx.moveTo(x,330);ctx.lineTo(x+30,170+(i%4)*20);ctx.lineTo(x+60,330);ctx.fill();
+   }
+ }
+ if(place==="city"){
+   for(let i=0;i<16;i++){
+     let x=i*65;
+     ctx.fillStyle=i%2?"#687b91":"#8997a6";
+     ctx.fillRect(x,160+(i%4)*22,48,180);
+     ctx.fillStyle="#f8df9a";
+     for(let y=180;y<310;y+=28)ctx.fillRect(x+9,y,8,10);
+   }
+ }
+
+ ctx.fillStyle="#363b42";
+ ctx.beginPath();ctx.moveTo(w*.34,h);ctx.lineTo(w*.46,h*.48);ctx.lineTo(w*.54,h*.48);ctx.lineTo(w*.66,h);ctx.fill();
+
+ ctx.strokeStyle="#fff";ctx.lineWidth=5;
+ ctx.setLineDash([28,24]);
+ ctx.lineDashOffset=-offset;
+ ctx.beginPath();ctx.moveTo(w*.5,h*.5);ctx.lineTo(w*.5,h);ctx.stroke();
+ ctx.setLineDash([]);
+
+ if(third){
+   ctx.fillStyle="#d52f43";
+   ctx.fillRect(w*.42,h*.72,w*.16,h*.12);
+   ctx.fillStyle="#bce4f1";
+   ctx.fillRect(w*.445,h*.735,w*.11,h*.045);
+   ctx.fillStyle="#17191c";
+   ctx.fillRect(w*.405,h*.81,w*.04,h*.045);
+   ctx.fillRect(w*.555,h*.81,w*.04,h*.045);
+ }else{
+   ctx.fillStyle="#202b37";
+   ctx.fillRect(0,h*.89,w,h*.11);
+   ctx.fillStyle="#a8d6e5";
+   ctx.fillRect(w*.4,h*.88,w*.2,5);
+ }
+
+ if(weather==="rain"){
+   ctx.strokeStyle="#d9eaff88";ctx.lineWidth=2;
+   for(let i=0;i<70;i++){
+     let x=(i*137+offset*3)%w,y=(i*79+offset*7)%h;
+     ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-7,y+18);ctx.stroke();
+   }
+ }
+ if(weather==="snow"){
+   ctx.fillStyle="#ffffffcc";
+   for(let i=0;i<65;i++){
+     let x=(i*97+offset*1.5)%w,y=(i*61+offset*2)%h;
+     ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill();
+   }
+ }
+ if(weather==="fog"){
+   ctx.fillStyle="#d8e1e8aa";ctx.fillRect(0,0,w,h);
+ }
+ if(day==="night"){
+   ctx.fillStyle="#10182e66";ctx.fillRect(0,0,w,h);
+ }
+ if(driving)offset=(offset+2)%52;
+ requestAnimationFrame(draw);
+}
+
+function updateClock(){
+ const now=new Date();
+ $("clock").textContent=
+ new Intl.DateTimeFormat("ko-KR",{
+ timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,
+ year:"numeric",month:"2-digit",day:"2-digit",
+ hour:"2-digit",minute:"2-digit",second:"2-digit",
+ hour12:false
+ }).format(now);
+}
+$("camera").onclick=()=>{
+ third=!third;
+ $("camera").textContent=third?"3인칭 화면":"1인칭 화면";
+};
+$("drive").onclick=()=>{
+ driving=!driving;
+ $("drive").textContent=driving?"자율주행 정지":"자율주행 시작";
+ $("status").textContent=driving?"자율주행 중 · 차선 유지":"주행 일시 정지";
+};
+$("music").onsubmit=e=>{
+ e.preventDefault();
+ try{
+  const u=new URL($("url").value);
+  if(!["https:","http:"].includes(u.protocol))throw Error();
+  window.open(u.href,"_blank","noopener,noreferrer");
+ }catch{alert("올바른 음악 링크를 입력해 주세요.")}
+};
+updateClock();
+setInterval(updateClock,250);
+draw();
+</script>
+</body>
+                                </html>
