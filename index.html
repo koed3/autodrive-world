@@ -3,72 +3,70 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101827">
-  <title>AutoDrive World</title>
+  <title>AutoDrive World | 3D Drive</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
   <header class="topbar">
     <div>
-      <p class="eyebrow">AUTONOMOUS DRIVING SIMULATOR</p>
+      <p class="eyebrow">AUTONOMOUS DRIVE EXPERIENCE</p>
       <h1>🚘 AutoDrive World</h1>
     </div>
-    <div class="live-clock">
-      <span class="live-dot"></span>
-      <span id="clock">시간 확인 중...</span>
-    </div>
+    <div class="clock"><span class="live-dot"></span><span id="clock">시간 확인 중...</span></div>
   </header>
 
   <main class="layout">
     <section class="game-panel">
-      <div class="scene-heading">
+      <div class="section-heading">
         <div>
-          <span class="eyebrow">YOUR JOURNEY</span>
-          <h2 id="sceneTitle">설원 드라이브</h2>
+          <p class="eyebrow">YOUR JOURNEY</p>
+          <h2 id="sceneTitle">알파인 설산 도로</h2>
         </div>
         <span id="driveStatus" class="status">대기 중</span>
       </div>
 
       <div id="game" class="game">
-        <div class="loading" id="loading">3D 드라이브를 준비하고 있습니다...</div>
+        <div id="loading" class="loading">3D 주행 환경을 준비하고 있습니다...</div>
         <div class="hud">
-          <div class="hud-item">
+          <div class="hud-card">
             <span>주행 속도</span>
             <strong><span id="speed">0</span><small> km/h</small></strong>
           </div>
-          <div class="hud-item hud-right">
-            <span id="weatherLabel">맑은 날씨</span>
-            <strong id="timeLabel">낮</strong>
+          <div class="hud-card right">
+            <span id="weatherLabel">☀️ 맑음</span>
+            <strong id="timeLabel">🌞 낮</strong>
           </div>
         </div>
-        <div class="camera-label" id="cameraLabel">3인칭 시점</div>
+        <span id="cameraLabel" class="camera-label">3인칭 시점</span>
+        <div class="crosshair" id="crosshair">+</div>
       </div>
 
-      <div class="drive-buttons">
+      <div class="buttons">
         <button id="drive" class="primary">▶ 자율주행 시작</button>
         <button id="camera" class="secondary">카메라 전환</button>
         <button id="stop" class="secondary">■ 정지</button>
       </div>
 
-      <div class="speed-control">
+      <div class="speed-box">
         <label for="cruise">목표 속도 <strong><span id="cruiseValue">80</span> km/h</strong></label>
-        <input id="cruise" type="range" min="20" max="140" value="80">
-        <div class="range-labels"><span>20 km/h</span><span>140 km/h</span></div>
+        <input id="cruise" type="range" min="20" max="120" value="80">
+        <div class="range-labels"><span>20 km/h</span><span>120 km/h</span></div>
       </div>
-      <p class="notice">※ 가상 3D 주행 체험입니다. 실제 자동차를 제어하지 않습니다.</p>
+      <p class="notice">가상 시뮬레이터입니다. 실제 자동차 제어 또는 실제 도로 자율주행 기능은 제공하지 않습니다.</p>
     </section>
 
-    <aside class="controls-panel">
-      <span class="eyebrow">CUSTOMIZE YOUR DRIVE</span>
+    <aside class="settings">
+      <p class="eyebrow">ENVIRONMENT CONTROL</p>
       <h2>주행 환경 설정</h2>
 
-      <label for="place">🌍 주행 풍경</label>
+      <label for="place">🌍 풍경</label>
       <select id="place">
-        <option value="snow">🏔️ 눈 덮인 산</option>
-        <option value="beach">🏖️ 해변과 바다</option>
-        <option value="forest">🌲 울창한 숲</option>
-        <option value="city">🌆 고층 도시</option>
+        <option value="snow">🏔️ 알파인 설산</option>
+        <option value="beach">🏖️ 해안 도로</option>
+        <option value="forest">🌲 깊은 숲</option>
+        <option value="city">🌆 현대 도시</option>
       </select>
 
       <label for="weather">🌦️ 날씨</label>
@@ -86,24 +84,24 @@
         <option value="night">🌙 밤</option>
       </select>
 
-      <div class="preview-card">
-        <span class="preview-icon">🛣️</span>
+      <div class="info-card">
+        <span class="info-icon">🛣️</span>
         <div>
-          <strong>자동 주행 시스템</strong>
-          <p id="message">주행 환경을 선택한 뒤 시작하세요.</p>
+          <strong>시뮬레이션 상태</strong>
+          <p id="message">풍경과 날씨를 선택하고 주행을 시작하세요.</p>
         </div>
       </div>
 
-      <div class="music-section">
+      <div class="music">
         <label for="musicUrl">🎵 음악 링크</label>
-        <input id="musicUrl" type="url" placeholder="https://음악 링크">
+        <input id="musicUrl" type="url" placeholder="https:// 음악 링크">
         <button id="musicButton" class="secondary full">음악 링크 열기</button>
-        <p class="small-note">음악 서비스에 따라 새 창에서 열리거나 로그인이 필요할 수 있습니다.</p>
+        <p class="small-note">음악은 새 탭에서 열립니다. 브라우저 정책상 자동 재생은 보장되지 않습니다.</p>
       </div>
     </aside>
   </main>
 
-  <footer>AutoDrive World · 가상 자율주행 시뮬레이션</footer>
+  <footer>AutoDrive World · Browser-based 3D driving prototype</footer>
   <script type="module" src="./main.js"></script>
 </body>
 </html>
